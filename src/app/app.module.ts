@@ -3,10 +3,14 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { OscilloscopeComponent } from './oscilloscope/oscilloscope.component';
+import { StateButtonComponent } from './state-button/state-button.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    OscilloscopeComponent,
+    StateButtonComponent
   ],
   imports: [
     BrowserModule,
