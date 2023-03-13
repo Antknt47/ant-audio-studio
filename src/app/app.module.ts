@@ -5,12 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { OscilloscopeComponent } from './oscilloscope/oscilloscope.component';
 import { StateButtonComponent } from './state-button/state-button.component';
+import { VolumeBarComponent } from './volume-bar/volume-bar.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     OscilloscopeComponent,
-    StateButtonComponent
+    StateButtonComponent,
+    VolumeBarComponent
   ],
   imports: [
     BrowserModule,

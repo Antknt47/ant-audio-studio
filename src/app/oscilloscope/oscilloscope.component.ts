@@ -8,6 +8,7 @@ import { Component, Input } from '@angular/core';
 export class OscilloscopeComponent {
   @Input() audioSource!: MediaStreamAudioSourceNode;
   @Input() audioCtx!: AudioContext;
+  @Input() state: string = "uninit";
   analyser!: AnalyserNode;
   svgPathStr = '';
   fftSize = 4096;
@@ -29,7 +30,6 @@ export class OscilloscopeComponent {
         let originData = new Uint8Array(this.analyser.fftSize / 2);
         this.analyser.getByteTimeDomainData(originData);
 
-        
         let trigger = 0;
         const triggerValue = 130;
         for(let index=1; index<originData.length; ++index) {
@@ -38,8 +38,8 @@ export class OscilloscopeComponent {
             break;
           }
         }
-        console.log(trigger)
-        if(!this.stop) {
+
+        if(this.state !== "paused") {
           this.svgPathStr = `M 10 ${200 - originData[0]}`
           for(let index=trigger; index<originData.length; ++index) {
             this.svgPathStr += `L ${(index-trigger)/2 + 10} ${200 - originData[index]}`
@@ -49,10 +49,7 @@ export class OscilloscopeComponent {
           }
         }
 
-      }, 1000/5);
-
-      //console.log(Math.max(originData));
-      
+      }, 1000/20);
     }
   }
 }

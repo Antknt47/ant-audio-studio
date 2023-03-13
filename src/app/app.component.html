@@ -1,6 +1,7 @@
 <div>
   <app-state-button [state]="this.audioState" (click)="audioCtrlBtnFunc()"></app-state-button>
-  <!-- <app-oscilloscope [audioSource]="this.audioSource" [audioCtx]="this.audioCtx"></app-oscilloscope> -->
+  <app-volume-bar [volume]="this.volume" [state]="this.audioState"></app-volume-bar>
+  <app-oscilloscope [state]="this.audioState" [audioSource]="this.audioSource" [audioCtx]="this.audioCtx"></app-oscilloscope>
 </div>
 
 <router-outlet></router-outlet>

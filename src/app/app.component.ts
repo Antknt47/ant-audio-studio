@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { max } from 'd3';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,11 @@ export class AppComponent {
   audioCtx!: AudioContext;
   audioStream!: MediaStream;
   audioSource!: MediaStreamAudioSourceNode;
+  analyser!: AnalyserNode;
+  
+  // Audio datas
+  fftSize = 4096;
+  volume = 0;
 
   // State control values
   audioState: string = "uninit";
@@ -38,6 +44,18 @@ export class AppComponent {
     }
   }
 
+  calculateDB(originData : Float32Array) {
+    let sum = 0;
+    for (let i = 0; i < originData.length; i++) {
+      sum += originData[i] * originData[i];
+    }
+    const rms = Math.sqrt(sum / originData.length);
+    
+    const dbfs = 20 * Math.log10(rms / 1);
+    
+    return dbfs;
+  }
+
   audioInit() {
     this.audioCtx = new (window.AudioContext)();
     this.audioState = "waiting";
@@ -47,6 +65,19 @@ export class AppComponent {
       if (this.audioSource) {
         this.audioState = "started";
       }
+
+      this.analyser = this.audioCtx.createAnalyser();
+      this.analyser.fftSize = 2048;
+      this.audioSource.connect(this.analyser);
+      console.log(`sampleRate: ${this.audioCtx.sampleRate}`)
+
+      setInterval(()=>{
+        let originData = new Float32Array(this.analyser.fftSize / 2);
+        this.analyser.getFloatTimeDomainData(originData);
+        this.volume = this.calculateDB(originData);
+
+      }, 1000/30);
+
     });
   }
 
