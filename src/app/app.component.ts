@@ -19,6 +19,8 @@ export class AppComponent {
   // Audio datas
   fftSize = 4096;
   volume = 0;
+  sampleRate = 0;
+  f0 = 0;
 
   // State control values
   audioState: string = "uninit";
@@ -63,11 +65,12 @@ export class AppComponent {
       this.audioStream = stream;
       this.audioSource = this.audioCtx.createMediaStreamSource(this.audioStream);
       if (this.audioSource) {
+        this.sampleRate = this.audioCtx.sampleRate;
         this.audioState = "started";
       }
 
       this.analyser = this.audioCtx.createAnalyser();
-      this.analyser.fftSize = 2048;
+      this.analyser.fftSize = 1024;
       this.audioSource.connect(this.analyser);
       console.log(`sampleRate: ${this.audioCtx.sampleRate}`)
 
@@ -75,8 +78,7 @@ export class AppComponent {
         let originData = new Float32Array(this.analyser.fftSize / 2);
         this.analyser.getFloatTimeDomainData(originData);
         this.volume = this.calculateDB(originData);
-
-      }, 1000/30);
+      }, 1000/20);
 
     });
   }

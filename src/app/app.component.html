@@ -1,7 +1,9 @@
-<div>
+<div id="app-container">
   <app-state-button [state]="this.audioState" (click)="audioCtrlBtnFunc()"></app-state-button>
+  <span>{{this.sampleRate}} Hz</span>
   <app-volume-bar [volume]="this.volume" [state]="this.audioState"></app-volume-bar>
   <app-oscilloscope [state]="this.audioState" [audioSource]="this.audioSource" [audioCtx]="this.audioCtx"></app-oscilloscope>
+  <app-fft-chart [state]="this.audioState" [audioSource]="this.audioSource" [audioCtx]="this.audioCtx"></app-fft-chart>
 </div>
 
 <router-outlet></router-outlet>
