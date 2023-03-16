@@ -8,7 +8,7 @@ import { max } from 'd3';
 })
 export class AppComponent {
   // Static values
-  static title = 'ant-audio-studio';
+  title = '𝔸𝕟𝕥 𝔸𝕦𝕕𝕚𝕠 𝕊𝕥𝕦𝕕𝕚𝕠';
 
   // Audio objects
   audioCtx!: AudioContext;

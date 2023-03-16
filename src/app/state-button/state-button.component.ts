@@ -1,19 +1,36 @@
 import { Component, EventEmitter, Input, Output, SimpleChange } from '@angular/core';
-
+import { AudioService } from '../audio-service.service';
 @Component({
   selector: 'app-state-button',
   templateUrl: './state-button.component.html',
   styleUrls: ['./state-button.component.less']
 })
 export class StateButtonComponent {
-  @Input() state = "uninit";
-
-  @Output() click = new EventEmitter();
-
+  state = "uninit";
   btnClass = "btn btn-success";
   iconClass = "bi bi-play-fill";
 
+  constructor (private audioService: AudioService) { }
+
+  ngOnInit() {
+    this.audioService.getStateObservable().subscribe(newState => {
+      this.state = newState;
+      this.setClass();
+    });
+  }
+
   ngOnChanges() {
+    this.setClass();
+  }
+
+  onClick() {
+    if(this.state === "waiting") {
+      return;
+    }
+    this.audioService.switch();
+  }
+
+  setClass() {
     if(this.state === "uninit" || this.state === "paused") {
       this.btnClass = "btn btn-success";
       this.iconClass = "bi bi-play-fill";
@@ -24,12 +41,5 @@ export class StateButtonComponent {
       this.btnClass = "btn btn-info";
       this.iconClass = "bi bi-hourglass-top"
     }
-  }
-
-  onClick() {
-    if(this.state === "waiting") {
-      return;
-    }
-    this.click.emit();
   }
 }

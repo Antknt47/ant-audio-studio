@@ -7,6 +7,7 @@ import { OscilloscopeComponent } from './oscilloscope/oscilloscope.component';
 import { StateButtonComponent } from './state-button/state-button.component';
 import { VolumeBarComponent } from './volume-bar/volume-bar.component';
 import { FftChartComponent } from './fft-chart/fft-chart.component';
+import { NavBarComponent } from './nav-bar/nav-bar.component';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { FftChartComponent } from './fft-chart/fft-chart.component';
     OscilloscopeComponent,
     StateButtonComponent,
     VolumeBarComponent,
-    FftChartComponent
+    FftChartComponent,
+    NavBarComponent
   ],
   imports: [
     BrowserModule,
