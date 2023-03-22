@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import * as d3 from 'd3';
+import { AudioService } from '../audio-service.service';
 
 @Component({
   selector: 'app-volume-bar',
@@ -7,8 +8,8 @@ import * as d3 from 'd3';
   styleUrls: ['./volume-bar.component.less']
 })
 export class VolumeBarComponent implements OnInit {
-  @Input() volume: number = 0;
-  @Input() state: string = "uninit";
+  volume: number = 0;
+  state: string = "uninit";
 
   volumeDisplay = this.volume;
 
@@ -19,45 +20,69 @@ export class VolumeBarComponent implements OnInit {
   private y: any;
   private bar: any;
 
+  constructor(private audioService: AudioService) { }
+
   valumeScale = d3.scaleLinear()
     .domain([-70, 0])
     .range([0, this.height])
 
+  valumeScaleNoNagetive(input: number) {
+    let res = this.valumeScale(input);
+    if(res < 0) {
+      return 0;
+    } else {
+      return res;
+    }
+  }
+
   ngOnInit() {
     this.initChart();
+
+    this.audioService.getVolumeObservable().subscribe(newVolume => {
+      this.volume = newVolume;
+      this.updateChart();
+    });
+
+    this.audioService.getStateObservable().subscribe(newState => {
+      this.state = newState;
+    });
+
     this.updateChart();
   }
 
   ngOnChanges() {
-    if (this.state === "started") {
-      this.updateChart();
-      this.volumeDisplay = this.volume;
-    }
+    this.updateChart();
   }
 
   private initChart() {
     this.svg = d3.select('.chart-container').append('svg')
       .attr("viewBox", [0, 0, this.width, this.height]);
 
+    const barHeight = this.valumeScaleNoNagetive(this.volume);
+
     this.svg.append("rect")
       .attr("fill", "steelblue")
       .attr("width", 20)
-      .attr("height", this.valumeScale(this.volume))
+      .attr("height", barHeight)
       .attr("x", 10)
-      .attr("y", this.valumeScale(this.volume));
+      .attr("y", barHeight);
 
     this.svg.append("g")
       .call(d3.axisLeft(this.valumeScale));
   }
 
   private updateChart() {
+    if (this.state !== "started") {
+      return;
+    }
+
+    const barHeight = this.valumeScaleNoNagetive(this.volume);
 
     this.svg.select("rect")
       .attr("fill", "steelblue")
       .attr("width", 20)
-      .attr("height", this.valumeScale(this.volume))
+      .attr("height", barHeight)
       .attr("x", 10)
-      .attr("y", this.height - this.valumeScale(this.volume));
-
+      .attr("y", this.height - barHeight);
   }
 }

@@ -16,9 +16,12 @@ export class AudioService {
 
   // Audio datas
   fftSize = 4096;
-  volume = 0;
+  private volume = 0;
+  private volumeSubject = new Subject<number>();
   sampleRate = 0;
   f0 = 0;
+  timeDomainData!: Float32Array;
+  freqDomainData!: Float32Array;
 
   constructor() {
     console.log("AudioService init.")
@@ -26,6 +29,10 @@ export class AudioService {
 
   getStateObservable(): Observable<'uninit' | 'started' | 'paused' | 'waiting'> {
     return this.stateSubject.asObservable();
+  }
+
+  getVolumeObservable(): Observable<number> {
+    return this.volumeSubject.asObservable();
   }
 
   start(): void {
@@ -99,9 +106,12 @@ export class AudioService {
       console.log(`sampleRate: ${this.audioCtx.sampleRate}`)
 
       setInterval(() => {
-        let originData = new Float32Array(this.analyser.fftSize / 2);
-        this.analyser.getFloatTimeDomainData(originData);
-        this.volume = this.calculateDB(originData);
+        if(!this.timeDomainData) {
+          this.timeDomainData = new Float32Array(this.analyser.fftSize / 2);
+        }        
+        this.analyser.getFloatTimeDomainData(this.timeDomainData);
+        this.volume = this.calculateDB(this.timeDomainData);
+        this.volumeSubject.next(this.volume);
       }, 1000 / 20);
 
     });
