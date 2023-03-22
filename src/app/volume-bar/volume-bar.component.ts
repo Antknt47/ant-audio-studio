@@ -28,7 +28,7 @@ export class VolumeBarComponent implements OnInit {
 
   valumeScaleNoNagetive(input: number) {
     let res = this.valumeScale(input);
-    if(res < 0) {
+    if(!res || res < 0) {
       return 0;
     } else {
       return res;
