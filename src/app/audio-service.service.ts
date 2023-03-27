@@ -13,10 +13,10 @@ export class AudioService {
   audioStream!: MediaStream;
   audioSource!: MediaStreamAudioSourceNode;
   analyser!: AnalyserNode;
+  fftAnalyser!: AnalyserNode;
 
   // Audio datas
   fftSize = 1024;
-  sampleRate = 0;
   f0 = 0;
   fps = 30; // Hz  
 
@@ -26,8 +26,11 @@ export class AudioService {
   private timeDomainData!: Float32Array;
   private timeDomainDataSubject = new Subject<Float32Array>();
 
-  private freqDomainData!: Float32Array;
-  private freqDomainDataSubject = new Subject<Float32Array>();
+  private freqDomainData!: Uint8Array;
+  private freqDomainDataSubject = new Subject<Uint8Array>();
+
+  private sampleRate: number = 0;
+  private sampleRateSubject = new Subject<number>();
 
   constructor() {
     console.log("AudioService init.")
@@ -45,8 +48,12 @@ export class AudioService {
     return this.timeDomainDataSubject.asObservable();
   }
 
-  getfreqDomainDataObservable(): Observable<Float32Array> {
+  getfreqDomainDataObservable(): Observable<Uint8Array> {
     return this.freqDomainDataSubject.asObservable();
+  }
+
+  getsampleRateObservable(): Observable<number> {
+    return this.sampleRateSubject.asObservable();
   }
 
   start(): void {
@@ -110,6 +117,7 @@ export class AudioService {
       this.audioSource = this.audioCtx.createMediaStreamSource(this.audioStream);
       if (this.audioSource) {
         this.sampleRate = this.audioCtx.sampleRate;
+        this.sampleRateSubject.next(this.sampleRate);
         this.audioState = "started";
         this.stateSubject.next(this.audioState);
       }
@@ -117,6 +125,11 @@ export class AudioService {
       this.analyser = this.audioCtx.createAnalyser();
       this.analyser.fftSize = 1024;
       this.audioSource.connect(this.analyser);
+
+      this.fftAnalyser = this.audioCtx.createAnalyser();
+      this.fftAnalyser.fftSize = 4096;
+      this.audioSource.connect(this.fftAnalyser);
+
       console.log(`sampleRate: ${this.audioCtx.sampleRate}`)
 
       setInterval(() => {
@@ -127,9 +140,9 @@ export class AudioService {
         this.timeDomainDataSubject.next(this.timeDomainData);
 
         if(!this.freqDomainData) {
-          this.freqDomainData = new Float32Array(this.analyser.fftSize / 2);
+          this.freqDomainData = new Uint8Array(this.fftAnalyser.fftSize / 2);
         }
-        this.analyser.getFloatFrequencyData(this.freqDomainData);
+        this.fftAnalyser.getByteFrequencyData(this.freqDomainData);
         this.freqDomainDataSubject.next(this.freqDomainData);
 
         this.volume = this.calculateDB(this.timeDomainData);
