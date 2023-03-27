@@ -15,13 +15,19 @@ export class AudioService {
   analyser!: AnalyserNode;
 
   // Audio datas
-  fftSize = 4096;
-  private volume = 0;
-  private volumeSubject = new Subject<number>();
+  fftSize = 1024;
   sampleRate = 0;
   f0 = 0;
-  timeDomainData!: Float32Array;
-  freqDomainData!: Float32Array;
+  fps = 30; // Hz  
+
+  private volume = 0;
+  private volumeSubject = new Subject<number>();
+
+  private timeDomainData!: Float32Array;
+  private timeDomainDataSubject = new Subject<Float32Array>();
+
+  private freqDomainData!: Float32Array;
+  private freqDomainDataSubject = new Subject<Float32Array>();
 
   constructor() {
     console.log("AudioService init.")
@@ -33,6 +39,14 @@ export class AudioService {
 
   getVolumeObservable(): Observable<number> {
     return this.volumeSubject.asObservable();
+  }
+
+  getTimeDomainDataObservable(): Observable<Float32Array> {
+    return this.timeDomainDataSubject.asObservable();
+  }
+
+  getfreqDomainDataObservable(): Observable<Float32Array> {
+    return this.freqDomainDataSubject.asObservable();
   }
 
   start(): void {
@@ -108,11 +122,20 @@ export class AudioService {
       setInterval(() => {
         if(!this.timeDomainData) {
           this.timeDomainData = new Float32Array(this.analyser.fftSize / 2);
-        }        
+        }
         this.analyser.getFloatTimeDomainData(this.timeDomainData);
+        this.timeDomainDataSubject.next(this.timeDomainData);
+
+        if(!this.freqDomainData) {
+          this.freqDomainData = new Float32Array(this.analyser.fftSize / 2);
+        }
+        this.analyser.getFloatFrequencyData(this.freqDomainData);
+        this.freqDomainDataSubject.next(this.freqDomainData);
+
         this.volume = this.calculateDB(this.timeDomainData);
         this.volumeSubject.next(this.volume);
-      }, 1000 / 20);
+
+      }, 1000 / this.fps);
 
     });
   }

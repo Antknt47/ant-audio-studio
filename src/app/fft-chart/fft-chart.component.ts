@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import * as d3 from 'd3';
+import { AudioService } from '../audio-service.service';
 
 @Component({
   selector: 'app-fft-chart',
@@ -7,13 +8,11 @@ import * as d3 from 'd3';
   styleUrls: ['./fft-chart.component.less']
 })
 export class FftChartComponent {
-  @Input() audioSource!: MediaStreamAudioSourceNode;
-  @Input() audioCtx!: AudioContext;
-  @Input() state: string = "uninit";
+  state: string = "uninit";
   @Input() width = 800;
   @Input() height = 100;
   analyser!: AnalyserNode;
-  audioData!: Uint8Array;
+  audioData: Uint8Array = new Uint8Array([255, 100, 0, 255, 100]);
   svg: any;
   barColor = "#66ccff";
   f0 = 0;
@@ -39,12 +38,18 @@ export class FftChartComponent {
     return maxIndex * simpleRate / (data.length*2);
   }
 
-  ngOnInit() {
+  constructor(private audioService: AudioService) { }
 
+  ngOnInit() {
+    this.audioService.getStateObservable().subscribe(newState => {
+      this.state = newState;
+      console.log("ngOnInit")
+      this.drawChart();
+    });
   }
 
   ngOnChanges() {
-    if(this.audioSource && this.audioCtx) {
+    /*if(this.audioSource && this.audioCtx) {
       this.analyser = this.audioCtx.createAnalyser();
       this.analyser.fftSize = 4096;
       this.audioSource.connect(this.analyser);
@@ -55,12 +60,12 @@ export class FftChartComponent {
         this.analyser.getByteFrequencyData(this.audioData);
         this.drawChart();
         this.f0 = this.getF0(this.audioData, this.audioCtx.sampleRate);
-      }, 1000/10);
-    }
+      }, 1000/1);
+    }*/
   }
 
   private drawChart(): void {
-    const binCount = this.analyser.fftSize / 2;
+    const binCount = this.audioData.length;
 
     // Prepare data for the chart
     const xScale = d3.scaleBand()
@@ -77,9 +82,9 @@ export class FftChartComponent {
       .map((d, i) => ({ frequency: i, amplitude: this.audioData[i] }));
 
     // Clear the previous chart
-    if (this.svg) {
+    /*if (this.svg) {
       this.svg.selectAll('*').remove();
-    }
+    }*/
 
     // Draw the chart
     this.svg = d3.select('.fft-container')

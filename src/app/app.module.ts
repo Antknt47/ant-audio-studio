@@ -8,6 +8,7 @@ import { StateButtonComponent } from './state-button/state-button.component';
 import { VolumeBarComponent } from './volume-bar/volume-bar.component';
 import { FftChartComponent } from './fft-chart/fft-chart.component';
 import { NavBarComponent } from './nav-bar/nav-bar.component';
+import { AmpChartComponent } from './amp-chart/amp-chart.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
     StateButtonComponent,
     VolumeBarComponent,
     FftChartComponent,
-    NavBarComponent
+    NavBarComponent,
+    AmpChartComponent
   ],
   imports: [
     BrowserModule,

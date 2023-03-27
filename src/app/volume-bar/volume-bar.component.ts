@@ -66,9 +66,6 @@ export class VolumeBarComponent implements OnInit {
       .attr("height", barHeight)
       .attr("x", 10)
       .attr("y", barHeight);
-
-    this.svg.append("g")
-      .call(d3.axisLeft(this.valumeScale));
   }
 
   private updateChart() {
