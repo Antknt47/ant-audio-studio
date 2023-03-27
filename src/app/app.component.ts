@@ -26,7 +26,7 @@ export class AppComponent {
   audioState: string = "uninit";
 
   ngOnInit() {
-    console.log("app init");
+    console.log("v0.1.0");
   }
 
   // State button's on click function
