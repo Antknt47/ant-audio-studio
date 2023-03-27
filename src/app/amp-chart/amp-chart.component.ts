@@ -60,8 +60,20 @@ export class AmpChartComponent {
     .join('rect')
       .attr("fill", "steelblue")
       .attr("width", 1)
-      .attr("height", (d: any) => d.value)
+      .attr("height", (d: any) => {
+        if(!d.value || d.value < 0) {
+          return 0;
+        } else {
+          return d.value;
+        }
+      })
       .attr("x", (d: any) => d.index * 1)
-      .attr("y",  (d: any) => this.height - (d.value))
+      .attr("y",  (d: any) => {
+        if(!d.value || d.value < 0) {
+          return this.height;
+        } else {
+          return this.height - d.value;
+        }
+      })
   }
 }
