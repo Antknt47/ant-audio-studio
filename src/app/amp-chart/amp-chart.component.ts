@@ -18,9 +18,13 @@ export class AmpChartComponent {
   timeDomainData!: Float32Array;
   maxVolume!: number;
   minVolume!: number;
-  ampArray = [{index: 0, value: 0} ];
-  index = 0;
+  ampArray:Array<Object> = [];
+  ampArrayIndex = 0;
+  ampSeq = 0;
   fps = 30;
+  displaySec = 10;
+
+  ampArrayLimit = this.fps * this.displaySec * 2;
 
   constructor(private audioService: AudioService) { }
 
@@ -37,7 +41,12 @@ export class AmpChartComponent {
     this.updateChart();
     setInterval(()=>{
       if(this.state === 'started') {
-        this.ampArray.push({index: this.index++, value: this.maxVolume * 500})
+        this.ampArray[this.ampArrayIndex] = ({index: this.ampSeq, maxValue: this.maxVolume, minValue: this.minVolume})
+        ++this.ampSeq;
+        ++this.ampArrayIndex;
+        if(this.ampArrayIndex > this.ampArrayLimit) {
+          this.ampArrayIndex = 0;
+        }
         this.updateChart();
       }
     }, 1000 / this.fps );
@@ -53,26 +62,34 @@ export class AmpChartComponent {
 
   private updateChart(): void {
     this.height = this.svg.node().clientHeight;
-    this.width = this.svg.attr('width');
+    this.width = this.svg.node().clientWidth;
+
+    const xScale = d3.scaleLinear()
+      .domain([this.ampSeq, this.ampSeq - this.fps * this.displaySec])
+      .range([this.width, 0])
+
+    const heightScaleMax = d3.scaleLinear()
+      .domain([0, 1])
+      .range([0, this.height / 2])
 
     this.svg.selectAll('rect')
     .data(this.ampArray)
     .join('rect')
       .attr("fill", "steelblue")
-      .attr("width", 1)
+      .attr("width", 3)
       .attr("height", (d: any) => {
-        if(!d.value || d.value < 0) {
+        if(!d.maxValue || d.maxValue < 0) {
           return 0;
         } else {
-          return d.value;
+          return heightScaleMax(d.maxValue) + heightScaleMax(-d.minValue);
         }
       })
-      .attr("x", (d: any) => d.index * 1)
+      .attr("x", (d: any) => xScale(d.index))
       .attr("y",  (d: any) => {
-        if(!d.value || d.value < 0) {
-          return this.height;
+        if(!d.maxValue || d.maxValue < 0) {
+          return this.height / 2;
         } else {
-          return this.height - d.value;
+          return this.height / 2 - heightScaleMax(d.maxValue);
         }
       })
   }
