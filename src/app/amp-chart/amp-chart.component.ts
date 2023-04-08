@@ -36,6 +36,12 @@ export class AmpChartComponent {
     this.audioService.getTimeDomainDataObservable().subscribe(datas => {
       this.maxVolume = d3.max(datas)!;
       this.minVolume = d3.min(datas)!;
+      if(!Number.isFinite(this.maxVolume)) {
+        this.maxVolume = 0;
+      }
+      if(!Number.isFinite(this.minVolume)) {
+        this.minVolume = 0;
+      }
     });
     this.initChart();
     this.updateChart();
@@ -71,26 +77,15 @@ export class AmpChartComponent {
     const heightScaleMax = d3.scaleLinear()
       .domain([0, 1])
       .range([0, this.height / 2])
+      .clamp(true)
 
     this.svg.selectAll('rect')
     .data(this.ampArray)
     .join('rect')
       .attr("fill", "steelblue")
       .attr("width", 3)
-      .attr("height", (d: any) => {
-        if(!d.maxValue || d.maxValue < 0) {
-          return 0;
-        } else {
-          return heightScaleMax(d.maxValue) + heightScaleMax(-d.minValue);
-        }
-      })
+      .attr("height", (d: any) => heightScaleMax(d.maxValue) + heightScaleMax(-d.minValue))
       .attr("x", (d: any) => xScale(d.index))
-      .attr("y",  (d: any) => {
-        if(!d.maxValue || d.maxValue < 0) {
-          return this.height / 2;
-        } else {
-          return this.height / 2 - heightScaleMax(d.maxValue);
-        }
-      })
+      .attr("y",  (d: any) => this.height / 2 - heightScaleMax(d.maxValue))
   }
 }
