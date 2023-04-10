@@ -124,6 +124,7 @@ export class AudioService {
 
       this.analyser = this.audioCtx.createAnalyser();
       this.analyser.fftSize = 1024;
+      this.analyser.smoothingTimeConstant = 0.1;
       this.audioSource.connect(this.analyser);
 
       this.fftAnalyser = this.audioCtx.createAnalyser();

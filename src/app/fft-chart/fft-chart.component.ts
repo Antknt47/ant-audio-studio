@@ -46,7 +46,7 @@ export class FftChartComponent {
   ngOnInit() {
     this.svg = d3.select('#fft-svg');
     this.height = this.svg.node().clientHeight;
-    this.width = this.svg.attr('width');
+    this.width = this.svg.node().clientWidth;
     this.audioService.getStateObservable().subscribe(newState => {
       this.state = newState;
     });
@@ -70,16 +70,19 @@ export class FftChartComponent {
       const yScale = d3.scaleLinear()
         .domain([0, 255])
         .range([0, this.height]);
+      const xScale = d3.scaleLinear()
+        .domain([0, 2000])
+        .range([0, this.width]);
       const data = new Array(this.audioData.length)
       .fill(0)
-      .map((d, i) => {return ({ frequency: i, amplitude: this.audioData[i]/3 });});
+      .map((d, i) => {return ({ frequency: i * this.sampleRate / 2 / this.audioData.length, amplitude: this.audioData[i]/3 });});
       this.svg.selectAll('rect')
       .data(data)
       .join('rect')
         .attr("fill", "steelblue")
-        .attr("width", 1)
+        .attr("width", 4)
         .attr("height", (d: any) => d.amplitude)
-        .attr("x", (d: any) => d.frequency * 3)
+        .attr("x", (d: any) => xScale(d.frequency))
         .attr("y",  (d: any) => this.height - (d.amplitude))
   }
 }
